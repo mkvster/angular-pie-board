@@ -1,0 +1,20 @@
+/*!
+ * angular-pie-board
+ * http://github.com/mkvster/angular-pie-board
+ * Version: 0.0.0 - 2016-10-05T04:27:25.212Z
+ * License: MIT
+ */
+
+
+.pie-board-svg {
+    padding: 0;
+    margin: 0;
+
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}

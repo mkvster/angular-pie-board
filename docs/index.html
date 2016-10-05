@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="demoApp">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Angular Pie Board</title>
+
+    <!--
+      IE8 support, see AngularJS Internet Explorer Compatibility http://docs.angularjs.org/guide/ie
+      For Firefox 3.6, you will also need to include jQuery and ECMAScript 5 shim
+    -->
+    <!--[if lt IE 9]>
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
+      <script src="http://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-shim.js"></script>
+      <script>
+        document.createElement('ui-select');
+        document.createElement('ui-select-match');
+        document.createElement('ui-select-choices');
+      </script>
+    <![endif]-->
+
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-sanitize.js"></script>
+	
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.css">
+
+    <link href="./dist/angular-pie-board.css" rel="stylesheet" />
+    <script src="./dist/angular-pie-board.js"></script>
+
+    <link href="./assets/demoApp.css" rel="stylesheet" />
+    <script src="./assets/demoApp.js"></script>
+    <script src="./assets/indexController.js"></script>
+
+</head>
+<body>
+    <div ng-controller="indexController as $ctrl">
+        <pie-board class="example"
+                   radius="150"
+                   start-angle="0"
+                   clockwise="true"
+                   text-offset="-50"
+                   pie-padding-x="30"
+                   pie-padding-y="30"
+                   ng-model="$ctrl.pieBoardData"
+                   selected="$ctrl.selected">
+
+        </pie-board>
+    </div>
+
+</body>
+</html>
