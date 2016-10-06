@@ -1,7 +1,7 @@
 /*!
  * angular-pie-board
  * http://github.com/mkvster/angular-pie-board
- * Version: 0.0.0 - 2016-10-05T04:27:25.116Z
+ * Version: 0.0.0 - 2016-10-06T17:36:45.417Z
  * License: MIT
  */
 
