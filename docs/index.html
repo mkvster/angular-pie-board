@@ -19,32 +19,42 @@
       </script>
     <![endif]-->
 
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-sanitize.js"></script>
 	
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
     <link href="./dist/angular-pie-board.css" rel="stylesheet" />
     <script src="./dist/angular-pie-board.js"></script>
 
     <link href="./assets/demoApp.css" rel="stylesheet" />
     <script src="./assets/demoApp.js"></script>
+    <script src="./assets/pie-board-settings.js"></script>
     <script src="./assets/indexController.js"></script>
 
 </head>
 <body>
     <div ng-controller="indexController as $ctrl">
-        <pie-board class="example"
-                   radius="150"
-                   start-angle="0"
-                   clockwise="true"
-                   text-offset="-50"
-                   pie-padding-x="30"
-                   pie-padding-y="30"
-                   ng-model="$ctrl.pieBoardData"
-                   selected="$ctrl.selected">
-
-        </pie-board>
+        <div class="row">
+            <div class="col-sm-3">
+                <pie-board-settings>
+                </pie-board-settings>
+            </div>
+            <div class="col-sm-5">
+                <pie-board class="example"
+                           radius="$ctrl.settings.radius"
+                           start-angle="$ctrl.settings.startAngle"
+                           clockwise="$ctrl.settings.clockwise"
+                           text-offset="$ctrl.settings.textOffset"
+                           pie-padding-x="$ctrl.settings.piePaddingX"
+                           pie-padding-y="$ctrl.settings.piePaddingY"
+                           ng-model="$ctrl.pieBoardData"
+                           selected="$ctrl.selected">
+                </pie-board>
+            </div>
+        </div>
     </div>
 
 </body>

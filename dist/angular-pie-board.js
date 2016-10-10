@@ -1,7 +1,7 @@
 /*!
  * angular-pie-board
  * http://github.com/mkvster/angular-pie-board
- * Version: 0.0.0 - 2016-10-06T17:36:45.417Z
+ * Version: 0.0.0 - 2016-10-10T06:25:41.030Z
  * License: MIT
  */
 
@@ -10,7 +10,7 @@
 "use strict";
     angular.module("pie.board", []);
 
-    var pieBoardController = ['$scope', function ($scope) {
+    var pieBoardController = ["$scope", function ($scope) {
         $scope.$ctrl = $scope;
         var $ctrl = $scope.$ctrl;
         $ctrl.pieBoardData = null;
@@ -22,17 +22,18 @@
         $ctrl.internalPaddingY = 1;
 
         $ctrl.init = function () {
-            $ctrl.startAngle = parseInt($ctrl.startAngle, 10);
+            $ctrl.startAngle = +$ctrl.startAngle;
             $ctrl.pieBoardData = $ctrl.ngModel;
             $ctrl.arrange();
+            $ctrl.$watchGroup(["$ctrl.startAngle", "$ctrl.clockwise"], $ctrl.arrange);
         };
-        
+
         $ctrl.getTotalHeight = function () {
-            return ($ctrl.radius + $ctrl.piePaddingY + $ctrl.internalPaddingY) * 2;
+            return (+$ctrl.radius + $ctrl.piePaddingY + $ctrl.internalPaddingY) * 2;
         };
 
         $ctrl.getTotalWidth = function () {
-            return ($ctrl.radius + $ctrl.piePaddingX + $ctrl.internalPaddingX) * 2;
+            return (+$ctrl.radius + $ctrl.piePaddingX + $ctrl.internalPaddingX) * 2;
         };
 
         $ctrl.getGetAngleDir = function () {
@@ -47,10 +48,10 @@
             return angle + $ctrl.getGetAngleDir() * delta;
         };
 
-
         $ctrl.recalculateStartAngles = function () {
-            $ctrl.startAngle = parseInt($ctrl.startAngle, 10);
+            $ctrl.startAngle = +$ctrl.startAngle;
             $ctrl.startAngles = [];
+            $ctrl.usedAngle = 0;
             angular.forEach($ctrl.pieBoardData, function (pieBoardData) {
                 $ctrl.startAngles.push(
                     $ctrl.addAngle($ctrl.startAngle, $ctrl.usedAngle));
@@ -84,8 +85,8 @@
             var longArc = ((endAngle - startAngle) <= 180) ? 0 : 1;
             var drawDir = $ctrl.clockwise ? 1 : 0;
 
-            var d = "M" + (r + dx) + "," + ( r + dy ) +
-                " L" + (r * (1 + start.x) + dx) + "," + (r * (1 + start.y)  + dy) +
+            var d = "M" + (r + dx) + "," + (r + dy) +
+                " L" + (r * (1 + start.x) + dx) + "," + (r * (1 + start.y) + dy) +
                 " A" + r + "," + r + ",1," + longArc + "," + drawDir + "," +
                 (r * (1 + end.x) + dx) + "," + (r * (1 + end.y) + dy) +
                 "Z";
@@ -101,33 +102,45 @@
         };
 
         $ctrl.getBlankSectorPath = function () {
-            $ctrl.startAngle = parseInt($ctrl.startAngle, 10);
+            $ctrl.startAngle = +$ctrl.startAngle;
             var startAngle = $ctrl.addAngle($ctrl.startAngle, $ctrl.usedAngle);
             var endAngle = $ctrl.addAngle($ctrl.startAngle, 360);
             return $ctrl.getSectorPath(startAngle, endAngle);
         };
 
-        $ctrl.getPieSliceTextPos = function (pieSliceIndex) {
+        $ctrl.getPieSliceMidPos = function (pieSliceIndex, axis, offset) {
+            offset = offset || 0;
             var startAngle = $ctrl.startAngles[pieSliceIndex];
             var midAngle = $ctrl.addAngle(startAngle,
                 $ctrl.pieBoardData[pieSliceIndex].angle / 2);
             var mid = $ctrl.getDirection(midAngle);
             var r = parseInt($ctrl.radius, 10);
-            return {
-                x: r + (r + $ctrl.textOffset) * mid.x,
-                y: r + (r + $ctrl.textOffset) * mid.y
-            };
+            return r + (r + offset) * mid[axis];
         };
 
         $ctrl.getPieSliceTextX = function (pieSliceIndex) {
-            var pos = $ctrl.getPieSliceTextPos(pieSliceIndex);
-            var result = pos.x + $ctrl.piePaddingX + $ctrl.internalPaddingX;
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "x", $ctrl.textOffset);
+            var result = pos + $ctrl.piePaddingX + $ctrl.internalPaddingX;
             return result;
         };
-        
+
         $ctrl.getPieSliceTextY = function (pieSliceIndex) {
-            var pos = $ctrl.getPieSliceTextPos(pieSliceIndex);
-            var result = pos.y + $ctrl.piePaddingY + $ctrl.internalPaddingY;
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "y", $ctrl.textOffset);
+            var result = pos + $ctrl.piePaddingY + $ctrl.internalPaddingY;
+            return result;
+        };
+
+        $ctrl.getPieSliceMenuX = function (pieSliceIndex) {
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "x", $ctrl.menuOffset);
+            var result = pos + $ctrl.piePaddingX + $ctrl.internalPaddingX -
+                $ctrl.chevronSize.width / 2;
+            return result;
+        };
+
+        $ctrl.getPieSliceMenuY = function (pieSliceIndex) {
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "y", $ctrl.menuOffset);
+            var result = pos + $ctrl.piePaddingY + $ctrl.internalPaddingY -
+                $ctrl.chevronSize.height / 2;
             return result;
         };
 
@@ -185,6 +198,7 @@
         };
 
         $ctrl.onPieSliceClick = function (pieSliceIndex, event) {
+            event.stopPropagation();
             if (!angular.isArray($ctrl.selected)) {
                 $ctrl.selected = pieSliceIndex;
                 $ctrl.lastSelectedStart = pieSliceIndex;
@@ -262,4 +276,4 @@
     module.directive("pieBoard", pieBoard);
 
 }());
-angular.module("pie.board").run(["$templateCache", function($templateCache) {$templateCache.put("templates/pie-board.tpl.html","<div><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"pie-board-svg\" ng-attr-height=\"{{$ctrl.getTotalHeight()}}\" ng-attr-width=\"{{$ctrl.getTotalWidth()}}\"><defs><pattern id=\"smalldot\" patternunits=\"userSpaceOnUse\" width=\"5\" height=\"5\"><image xlink:href=\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc1JyBoZWlnaHQ9JzUnPgo8cmVjdCB3aWR0aD0nNScgaGVpZ2h0PSc1JyBmaWxsPScjZmZmJy8+CjxyZWN0IHdpZHRoPScxJyBoZWlnaHQ9JzEnIGZpbGw9JyNjY2MnLz4KPC9zdmc+\" x=\"0\" y=\"0\" width=\"5\" height=\"5\"></image></pattern><pattern id=\"diagonal-stripe-1\" patternunits=\"userSpaceOnUse\" width=\"10\" height=\"10\"><image xlink:href=\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxMCcgaGVpZ2h0PScxMCc+CiAgPHJlY3Qgd2lkdGg9JzEwJyBoZWlnaHQ9JzEwJyBmaWxsPSd3aGl0ZScvPgogIDxwYXRoIGQ9J00tMSwxIGwyLC0yCiAgICAgICAgICAgTTAsMTAgbDEwLC0xMAogICAgICAgICAgIE05LDExIGwyLC0yJyBzdHJva2U9J2JsYWNrJyBzdHJva2Utd2lkdGg9JzEnLz4KPC9zdmc+Cg==\" x=\"0\" y=\"0\" width=\"10\" height=\"10\"></image></pattern></defs><path ng-repeat=\"pieSlice in $ctrl.pieBoardData\" ng-attr-id=\"{{pieSlice.id}}\" ng-attr-d=\"{{$ctrl.getPieSlicePath($index)}}\" ng-attr-fill=\"{{$ctrl.isPieSliceSelected($index)? \'aqua\' : pieSlice.color}}\" ng-click=\"$ctrl.onPieSliceClick($index, $event)\" stroke=\"black\"></path><text ng-repeat=\"pieSlice in $ctrl.pieBoardData\" ng-attr-x=\"{{$ctrl.getPieSliceTextX($index)}}\" ng-attr-y=\"{{$ctrl.getPieSliceTextY($index)}}\" ng-attr-font-weight=\"{{$ctrl.isPieSliceSelected($index)? \'bolder\' : \'normal\'}}\" ng-attr-font-size=\"{{$ctrl.isPieSliceSelected($index)? 12 : 9}}\" ng-click=\"$ctrl.onPieSliceClick($index, $event)\" text-anchor=\"middle\" cursor=\"default\" dominant-baseline=\"middle\" font-family=\"Courier\">{{pieSlice.id}}</text><path ng-show=\"$ctrl.shouldShowBlankSector()\" ng-attr-d=\"{{$ctrl.getBlankSectorPath()}}\" style=\"fill: url(#smalldot) white;\" stroke=\"black\"></path></svg></div>");}]);
+angular.module("pie.board").run(["$templateCache", function($templateCache) {$templateCache.put("templates/pie-board.tpl.html","<div class=\"pie-board\" ng-style=\"{ height: $ctrl.getTotalHeight(), width: $ctrl.getTotalWidth() }\"><svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" class=\"pie-board-svg\" ng-attr-height=\"{{$ctrl.getTotalHeight()}}\" ng-attr-width=\"{{$ctrl.getTotalWidth()}}\"><defs><pattern id=\"smalldot\" patternunits=\"userSpaceOnUse\" width=\"5\" height=\"5\"><image xlink:href=\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc1JyBoZWlnaHQ9JzUnPgo8cmVjdCB3aWR0aD0nNScgaGVpZ2h0PSc1JyBmaWxsPScjZmZmJy8+CjxyZWN0IHdpZHRoPScxJyBoZWlnaHQ9JzEnIGZpbGw9JyNjY2MnLz4KPC9zdmc+\" x=\"0\" y=\"0\" width=\"5\" height=\"5\"></image></pattern></defs><path ng-repeat=\"pieSlice in $ctrl.pieBoardData\" ng-attr-id=\"{{pieSlice.id}}\" ng-attr-d=\"{{$ctrl.getPieSlicePath($index)}}\" ng-attr-fill=\"{{$ctrl.isPieSliceSelected($index)? \'aqua\' : pieSlice.color}}\" ng-click=\"$ctrl.onPieSliceClick($index, $event)\" stroke=\"black\"></path><text ng-repeat=\"pieSlice in $ctrl.pieBoardData\" ng-attr-id=\"{{\'text\' + pieSlice.id}}\" ng-attr-x=\"{{$ctrl.getPieSliceTextX($index)}}\" ng-attr-y=\"{{$ctrl.getPieSliceTextY($index)}}\" ng-attr-font-weight=\"{{$ctrl.isPieSliceSelected($index)? \'bolder\' : \'normal\'}}\" ng-attr-font-size=\"{{$ctrl.isPieSliceSelected($index)? 12 : 9}}\" ng-click=\"$ctrl.onPieSliceClick($index, $event)\" text-anchor=\"middle\" cursor=\"default\" dominant-baseline=\"middle\" font-family=\"Courier\">{{pieSlice.id}}</text><path ng-show=\"$ctrl.shouldShowBlankSector()\" ng-attr-d=\"{{$ctrl.getBlankSectorPath()}}\" style=\"fill: url(#smalldot) white;\" stroke=\"black\"></path></svg></div>");}]);

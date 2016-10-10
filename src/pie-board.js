@@ -1,4 +1,4 @@
-﻿    var pieBoardController = ['$scope', function ($scope) {
+    var pieBoardController = ["$scope", function ($scope) {
         $scope.$ctrl = $scope;
         var $ctrl = $scope.$ctrl;
         $ctrl.pieBoardData = null;
@@ -10,17 +10,18 @@
         $ctrl.internalPaddingY = 1;
 
         $ctrl.init = function () {
-            $ctrl.startAngle = parseInt($ctrl.startAngle, 10);
+            $ctrl.startAngle = +$ctrl.startAngle;
             $ctrl.pieBoardData = $ctrl.ngModel;
             $ctrl.arrange();
+            $ctrl.$watchGroup(["$ctrl.startAngle", "$ctrl.clockwise"], $ctrl.arrange);
         };
-        
+
         $ctrl.getTotalHeight = function () {
-            return ($ctrl.radius + $ctrl.piePaddingY + $ctrl.internalPaddingY) * 2;
+            return (+$ctrl.radius + $ctrl.piePaddingY + $ctrl.internalPaddingY) * 2;
         };
 
         $ctrl.getTotalWidth = function () {
-            return ($ctrl.radius + $ctrl.piePaddingX + $ctrl.internalPaddingX) * 2;
+            return (+$ctrl.radius + $ctrl.piePaddingX + $ctrl.internalPaddingX) * 2;
         };
 
         $ctrl.getGetAngleDir = function () {
@@ -35,10 +36,10 @@
             return angle + $ctrl.getGetAngleDir() * delta;
         };
 
-
         $ctrl.recalculateStartAngles = function () {
-            $ctrl.startAngle = parseInt($ctrl.startAngle, 10);
+            $ctrl.startAngle = +$ctrl.startAngle;
             $ctrl.startAngles = [];
+            $ctrl.usedAngle = 0;
             angular.forEach($ctrl.pieBoardData, function (pieBoardData) {
                 $ctrl.startAngles.push(
                     $ctrl.addAngle($ctrl.startAngle, $ctrl.usedAngle));
@@ -72,8 +73,8 @@
             var longArc = ((endAngle - startAngle) <= 180) ? 0 : 1;
             var drawDir = $ctrl.clockwise ? 1 : 0;
 
-            var d = "M" + (r + dx) + "," + ( r + dy ) +
-                " L" + (r * (1 + start.x) + dx) + "," + (r * (1 + start.y)  + dy) +
+            var d = "M" + (r + dx) + "," + (r + dy) +
+                " L" + (r * (1 + start.x) + dx) + "," + (r * (1 + start.y) + dy) +
                 " A" + r + "," + r + ",1," + longArc + "," + drawDir + "," +
                 (r * (1 + end.x) + dx) + "," + (r * (1 + end.y) + dy) +
                 "Z";
@@ -89,33 +90,45 @@
         };
 
         $ctrl.getBlankSectorPath = function () {
-            $ctrl.startAngle = parseInt($ctrl.startAngle, 10);
+            $ctrl.startAngle = +$ctrl.startAngle;
             var startAngle = $ctrl.addAngle($ctrl.startAngle, $ctrl.usedAngle);
             var endAngle = $ctrl.addAngle($ctrl.startAngle, 360);
             return $ctrl.getSectorPath(startAngle, endAngle);
         };
 
-        $ctrl.getPieSliceTextPos = function (pieSliceIndex) {
+        $ctrl.getPieSliceMidPos = function (pieSliceIndex, axis, offset) {
+            offset = offset || 0;
             var startAngle = $ctrl.startAngles[pieSliceIndex];
             var midAngle = $ctrl.addAngle(startAngle,
                 $ctrl.pieBoardData[pieSliceIndex].angle / 2);
             var mid = $ctrl.getDirection(midAngle);
             var r = parseInt($ctrl.radius, 10);
-            return {
-                x: r + (r + $ctrl.textOffset) * mid.x,
-                y: r + (r + $ctrl.textOffset) * mid.y
-            };
+            return r + (r + offset) * mid[axis];
         };
 
         $ctrl.getPieSliceTextX = function (pieSliceIndex) {
-            var pos = $ctrl.getPieSliceTextPos(pieSliceIndex);
-            var result = pos.x + $ctrl.piePaddingX + $ctrl.internalPaddingX;
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "x", $ctrl.textOffset);
+            var result = pos + $ctrl.piePaddingX + $ctrl.internalPaddingX;
             return result;
         };
-        
+
         $ctrl.getPieSliceTextY = function (pieSliceIndex) {
-            var pos = $ctrl.getPieSliceTextPos(pieSliceIndex);
-            var result = pos.y + $ctrl.piePaddingY + $ctrl.internalPaddingY;
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "y", $ctrl.textOffset);
+            var result = pos + $ctrl.piePaddingY + $ctrl.internalPaddingY;
+            return result;
+        };
+
+        $ctrl.getPieSliceMenuX = function (pieSliceIndex) {
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "x", $ctrl.menuOffset);
+            var result = pos + $ctrl.piePaddingX + $ctrl.internalPaddingX -
+                $ctrl.chevronSize.width / 2;
+            return result;
+        };
+
+        $ctrl.getPieSliceMenuY = function (pieSliceIndex) {
+            var pos = $ctrl.getPieSliceMidPos(pieSliceIndex, "y", $ctrl.menuOffset);
+            var result = pos + $ctrl.piePaddingY + $ctrl.internalPaddingY -
+                $ctrl.chevronSize.height / 2;
             return result;
         };
 
@@ -173,6 +186,7 @@
         };
 
         $ctrl.onPieSliceClick = function (pieSliceIndex, event) {
+            event.stopPropagation();
             if (!angular.isArray($ctrl.selected)) {
                 $ctrl.selected = pieSliceIndex;
                 $ctrl.lastSelectedStart = pieSliceIndex;

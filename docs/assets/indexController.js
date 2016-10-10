@@ -86,6 +86,15 @@
         ];
 
         this.selected = [];
+
+        this.settings = {
+            radius: 150,
+            startAngle: 0,
+            clockwise: true,
+            textOffset: 10,
+            piePaddingX: 30,
+            piePaddingY: 30,
+        };
     }
 
     indexController.$inject = [];

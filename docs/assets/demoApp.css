@@ -1,14 +1,8 @@
-html {
-    display: table;
-    margin: auto;
-}
-
 body {
-    display: table-cell;
-    padding-top: 100px;
+    padding: 20px;
+    margin: 20px;
 }
 
 .example {
-    padding: 20px;
     border: solid lightgray 1px;
 }
