@@ -1,4 +1,4 @@
-﻿// indexController.js
+// indexController.js
 (function () {
     "use strict";
 
